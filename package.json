@@ -1,0 +1,20 @@
+{
+  "name": "thready",
+  "version": "1.0.0",
+  "description": "With Thready you can run your tasks with assigned priority and plan their execution",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdelFattakhova/thready.git"
+  },
+  "author": "Adel Fattakhova",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AdelFattakhova/thready/issues"
+  },
+  "homepage": "https://github.com/AdelFattakhova/thready#readme"
+}
