@@ -1,0 +1,47 @@
+.interactive {
+  width: fit-content;
+  margin: 0 auto 30px;
+}
+
+.interactive__block {
+  width: 100px;
+  height: 100px;
+  margin: 20px auto;
+  border: chocolate 1px dashed;
+}
+
+.interactive__block:hover,
+.interactive__block._filled {
+  background-color: chocolate;
+}
+
+.container {
+  display: grid;
+  align-items: end;
+  grid-template-columns: repeat(4, 1fr);
+  width: 1000px;
+  gap: 30px 50px;
+  margin: auto;
+}
+
+.progress {
+  width: 0;
+  height: 30px;
+  margin-bottom: 5px;
+}
+
+.progress::after {
+  content: '';
+  position: relative;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 210px;
+  height: 30px;
+  border: 1px dashed;
+  border-color: inherit;
+}
+
+.text {
+  font-family: Arial, Helvetica, sans-serif;
+}
