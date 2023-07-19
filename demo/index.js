@@ -8,7 +8,7 @@ const COLORS = {
   minor: '#325527',
   trivial: '#b0b0b0',
 }
-const ITERATIONS = 1e6;
+const ITERATIONS = 1e5;
 
 const scheduler = new Scheduler();
 
@@ -50,13 +50,13 @@ function createTask() {
   scheduler.addTask(function* () {
     for (let j = 1; j <= ITERATIONS; j++) {
       text.innerHTML = `<span>${j}</span>`;
-      progress.style.width = `${j / ITERATIONS * 100}%`
+      progress.style.width = `${j / ITERATIONS * 100}%`;
       yield j;
     }
   }, { priority });
 }
 
-for (let i = 0; i < 8; i++) {
+for (let i = 0; i < 48; i++) {
   createTask();
 }
 
@@ -65,3 +65,15 @@ setTimeout(() => {
     createTask();
   }
 }, 5000);
+
+scheduler.addTask(() => {
+  try {
+    let count = 0;
+    for (let j = 0; j < 1e6; j++) {
+      count++;
+    }
+    return Promise.resolve(count);
+  } catch (e) {
+    return Promise.reject(e);
+  }
+}, { inWebWorker: true });
