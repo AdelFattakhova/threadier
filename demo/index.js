@@ -1,9 +1,25 @@
 import { Scheduler } from '../lib/scheduler.js';
 import { PRIORITIES } from '../lib/const.js';
 
+const COLORS = {
+  blocker: '#c81d06',
+  critical: '#e98c00',
+  major: '#e9e500',
+  minor: '#325527',
+  trivial: '#b0b0b0',
+}
+const ITERATIONS = 1e6;
+
 const scheduler = new Scheduler();
 
 const container = document.querySelector('.container');
+const interactive = document.querySelector('.interactive');
+const block = interactive.querySelector('div');
+const button = interactive.querySelector('button');
+
+button.addEventListener('click', () => {
+  block.classList.toggle('_filled');
+})
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -24,17 +40,7 @@ function newElement() {
   return { progress, text };
 }
 
-const COLORS = {
-  blocker: '#c81d06',
-  critical: '#e98c00',
-  major: '#e9e500',
-  minor: '#325527',
-  trivial: '#b0b0b0',
-}
-
-const iterations = 1e6;
-
-for (let i = 0; i < 16; i++) {
+function createTask() {
   const priority = PRIORITIES[getRandomInt(0, 4)];
   const { progress, text } = newElement();
   progress.style.backgroundColor = COLORS[priority];
@@ -42,18 +48,20 @@ for (let i = 0; i < 16; i++) {
   progress.dataset.color = COLORS[priority]
 
   scheduler.addTask(function* () {
-    for (let j = 1; j <= iterations; j++) {
+    for (let j = 1; j <= ITERATIONS; j++) {
       text.innerHTML = `<span>${j}</span>`;
-      progress.style.width = `${j / iterations * 100}%`
+      progress.style.width = `${j / ITERATIONS * 100}%`
       yield j;
     }
   }, { priority });
 }
 
-const interactive = document.querySelector('.interactive');
-const block = interactive.querySelector('div');
-const button = interactive.querySelector('button');
+for (let i = 0; i < 8; i++) {
+  createTask();
+}
 
-button.addEventListener('click', () => {
-  block.classList.toggle('_filled');
-})
+setTimeout(() => {
+  for (let i = 0; i < 8; i++) {
+    createTask();
+  }
+}, 5000);
