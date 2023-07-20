@@ -24,6 +24,11 @@
   margin: auto;
 }
 
+.task {
+  position: relative;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 .progress {
   width: 0;
   height: 30px;
@@ -42,6 +47,8 @@
   border-color: inherit;
 }
 
-.text {
-  font-family: Arial, Helvetica, sans-serif;
+.label {
+  position: absolute;
+  top: 5px;
+  right: 5px;
 }

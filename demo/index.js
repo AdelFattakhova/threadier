@@ -25,7 +25,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function newElement() {
+function newElement(label) {
   const el = document.createElement('div');
   const progress = document.createElement('div');
   const text = document.createElement('div');
@@ -35,14 +35,22 @@ function newElement() {
   text.innerHTML = `<span>0</span>`;
   el.append(progress);
   el.append(text);
+
+  if (label) {
+    const labelEl = document.createElement('div');
+    labelEl.className = 'label';
+    labelEl.textContent = label;
+    el.append(labelEl);
+  }
+
   container.append(el);
 
   return { progress, text };
 }
 
-function createTask() {
+function createTask(label) {
   const priority = PRIORITIES[getRandomInt(0, 4)];
-  const { progress, text } = newElement();
+  const { progress, text } = newElement(label);
   progress.style.backgroundColor = COLORS[priority];
   progress.style.borderColor = COLORS[priority];
   progress.dataset.color = COLORS[priority]
@@ -56,26 +64,33 @@ function createTask() {
   }, { priority });
 }
 
-const taskes = [];
+const tasks = [];
 
 for (let i = 0; i < 48; i++) {
-  taskes.push(createTask());
+  let label = '';
+  if (i % 4 === 0) label = 'stopped in 5s';
+  tasks.push(createTask(label));
 }
 
 setTimeout(() => {
-  for (let i = 0; i < 8; i++) {
-    taskes.push(createTask());
+  for (let i = 0; i < 7; i++) {
+    let label = '';
+    if (i % 4 === 0) label = 'stopped in 5s';
+    tasks.push(createTask(label));
+  }
+}, 1000);
+
+setTimeout(() => {
+  for (let i = 0; i < tasks.length; i++) {
+    if (i % 4 === 0) tasks[i].abort();
   }
 }, 5000);
 
 setTimeout(() => {
-  taskes[0].abort();
-  taskes[4].abort();
-  taskes[8].abort();
-  taskes[16].abort();
-  scheduler.abortTask(taskes[24]);
-  scheduler.abortTask(taskes[20]);
-  scheduler.abortTask(taskes[12]);
+  tasks.push(createTask('paused every 2s'));
+  setInterval(() => {
+    tasks[tasks.length - 1].toggle();
+  }, 2000);
 }, 5000);
 
 const wwTask = scheduler.addTask(() => {
