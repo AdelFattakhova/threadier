@@ -68,21 +68,21 @@ const tasks = [];
 
 for (let i = 0; i < 48; i++) {
   let label = '';
-  if (i % 4 === 0) label = 'stopped in 5s';
+  if (i % 4 === 0) label = 'cancelled in 5s';
   tasks.push(createTask(label));
 }
 
 setTimeout(() => {
   for (let i = 0; i < 7; i++) {
     let label = '';
-    if (i % 4 === 0) label = 'stopped in 5s';
+    if (i % 4 === 0) label = 'cancelled in 5s';
     tasks.push(createTask(label));
   }
 }, 1000);
 
 setTimeout(() => {
   for (let i = 0; i < tasks.length; i++) {
-    if (i % 4 === 0) tasks[i].abort();
+    if (i % 4 === 0) tasks[i].cancel();
   }
 }, 5000);
 
@@ -105,4 +105,4 @@ const wwTask = scheduler.addTask(() => {
   }
 }, { inWebWorker: true });
 
-scheduler.abortTask(wwTask);
+scheduler.cancelTask(wwTask);
