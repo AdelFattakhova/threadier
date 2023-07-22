@@ -32,14 +32,15 @@ const scheduler = new Scheduler({
 
 Scheduler instance offers methods to add tasks and cancel the existing ones:
 
-### `addTask(callback, options = {})`
-Adds task to the scheduler. Returns a task instance.
+### `addTask(callback, options = {}): Promise<any>`
+Adds task to the scheduler.
 
 `callback` – the task itself (a generator function, or another implementation of iterator protocol)
 
 `options` – (optional) task parameters such as:
 - `priority: string` – (default is `'minor'`) priority level of the task, determines the speed of task completion
-- `inWebWorker: boolean` – (default is `false`) whether the task must be run in a separate thread inside Web Worker or not. If task is requested to run in Web Worker, it's not added into scheduler mechanism and goes right into Web Worker
+- `inWebWorker: boolean` – (default is `false`) whether the task must be run in a separate thread inside Web Worker or not. If task is requested to run in Web Worker, it's not added into scheduler mechanism and goes right into Web Worker. **Note: the task must return a Promise-like object in order for you to be able to receive the outcome of this task's execution.**
+- `paused: boolean` – (default is `false`) whether the task is paused from the beginning
 
 Example:
 ```js
@@ -50,19 +51,24 @@ const task = scheduler.addTask(function* () {
 }, { priority: 'blocker' });
 ```
 
-### `cancelTask(task)`
-Stops the given task execution and drops it from scheduler.
+### `cancelTask(taskPromise): boolean`
+Stops the given task's execution and drops it from scheduler.
 
-`task` – task instance returned by `addTask()`
+`taskPromise` – Promise returned by `.addTask()`
 
 ```js
 scheduler.cancelTask(task);
 ```
 
-The task can also be cancelled with its method `cancel()`:
+### `toggleTask(taskPromise): boolean`
+Pauses the task's execution, as well as starts it again if the task has already been paused in the moment of method call.
+
+`taskPromise` – Promise returned by `.addTask()`
+
 ```js
-task.cancel();
+scheduler.toggleTask(task);
 ```
+
 ## Tasks
 In order to be pausable, each task that you pass into scheduler must be a generator function, or implement iterator protocol on its own.
 
@@ -73,8 +79,36 @@ Possible task priority levels (from lowest to highest):
 - `'critical'`
 - `'blocker'`
 
-### Pausing tasks
-The task instance returned by `addTask()` has `toggle()` method. It pauses the task execution, as well as starts it again after a pause.
+### Getting tasks results
+
+Task initialization results in a Promise, so standard promise methods such as `.then()` and `.catch()` can be used to get the results of task's execution for further processing. Example:
 ```js
-task.toggle();
+const task = scheduler.addTask(function* () {
+  for (let j = 0; j < 1e6; j++) {
+    yield j;
+  }
+}, { priority: 'blocker' });
+
+task
+  .then((result) => console.log(result))
+  .catch((error) => console.log(error));
+```
+
+Example of a WebWorker task:
+```js
+const wwTask = scheduler.addTask(() => {
+  try {
+    let count = 0;
+    for (let j = 0; j < 1e7; j++) {
+      count++;
+    }
+    return Promise.resolve(count);
+  } catch (e) {
+    return Promise.reject(e);
+  }
+}, { inWebWorker: true });
+
+wwTask
+  .then((result) => console.log(result))
+  .catch((error) => console.log(error));
 ```

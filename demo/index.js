@@ -66,32 +66,32 @@ function createTask(label) {
 
 const tasks = [];
 
-for (let i = 0; i < 48; i++) {
+for (let i = 0; i < 60; i++) {
   let label = '';
-  if (i % 4 === 0) label = 'cancelled in 5s';
+  if (i % 8 === 0) label = 'cancelled in 5s';
+  if (i === 26) label = 'paused every 3s';
   tasks.push(createTask(label));
 }
 
 setTimeout(() => {
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < tasks.length; i++) {
+    if (i % 8 === 0) scheduler.cancelTask(tasks[i]);
+  }
+}, 5000);
+
+tasks[1].then((result) => console.log('result of the second task', result))
+  .catch((e) => console.log(e));
+
+setTimeout(() => {
+  for (let i = 0; i < 60; i++) {
     let label = '';
-    if (i % 4 === 0) label = 'cancelled in 5s';
     tasks.push(createTask(label));
   }
-}, 1000);
-
-setTimeout(() => {
-  for (let i = 0; i < tasks.length; i++) {
-    if (i % 4 === 0) tasks[i].cancel();
-  }
 }, 5000);
 
-setTimeout(() => {
-  tasks.push(createTask('paused every 2s'));
-  setInterval(() => {
-    tasks[tasks.length - 1].toggle();
-  }, 2000);
-}, 5000);
+setInterval(() => {
+  scheduler.toggleTask(tasks[26]);
+}, 3000);
 
 const wwTask = scheduler.addTask(() => {
   try {
@@ -105,4 +105,5 @@ const wwTask = scheduler.addTask(() => {
   }
 }, { inWebWorker: true });
 
-scheduler.cancelTask(wwTask);
+wwTask.then((result) => console.log('result of a task inside web worker', result))
+  .catch((error) => console.log(error));

@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
     "target": "es2017",
+    "lib": ["WebWorker"],
     "module": "ES6",
     "outDir": "lib",
+    "moduleResolution": "node"
   },
   "include": ["src/*"]
 }

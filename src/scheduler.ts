@@ -12,12 +12,11 @@ export class Scheduler {
     tail: new TasksCollection(),
   };
   #webWorkerTasks: Map<Task, Worker> = new Map();
+  #tasksResults: Map<Promise<any>, Task> = new Map();
 
   constructor(options: SchedulerOptions) {
     this.block = options?.block || this.block;
     this.sleep = options?.sleep || this.sleep;
-
-    this.#start();
   }
 
   async #start() {
@@ -47,11 +46,18 @@ export class Scheduler {
         }
 
         if (timeBudget + priorityFactor <= 1 && !paused) {
-          const done = this.#executeTask(iterator, this.block * priorityFactor);
+          const run = this.#runTask(iterator, this.block * priorityFactor);
+
           this.#removeTask(task);
           timeBudget = +(timeBudget + priorityFactor).toFixed(1);
 
-          if (!done) {
+          if (run?.done) {
+            if (run.value instanceof Error) {
+              task.reject(run.value);
+            } else {
+              task.resolve(run.value);
+            }
+          } else {
             this.#keepTask(task);
           }
         }
@@ -66,13 +72,19 @@ export class Scheduler {
     }
   }
 
-  #removeTask(task: Task) {
+  #removeTask(task: Task): boolean {
+    let wasRemoved = false;
+
     for (const part in this.#tasksPipe) {
       if (this.#tasksPipe[part].collection[task.priority].delete(task)) {
+        wasRemoved = true;
         this.#tasksPipe[part].size--;
       }
     }
+
     if (this.#tasksPipe.head.size === 0) this.#swapPipe();
+
+    return wasRemoved;
   }
 
   #keepTask(task: Task) {
@@ -84,30 +96,38 @@ export class Scheduler {
     [this.#tasksPipe.tail, this.#tasksPipe.head] = [this.#tasksPipe.head, this.#tasksPipe.tail];
   }
 
-  #executeTask(task: Generator, allowedTime: number) {
-    let startTime = Date.now();
+  #runTask(task: Generator, allowedTime: number)
+    : { value: any, done: boolean } {
+      let startTime = Date.now();
+      let value: any;
 
-    while (Date.now() - startTime < allowedTime) {
-      try {
-        const { done } = task.next();
-        if (done) return done;
-      } catch (e) {
-        console.log(e);
+      while (Date.now() - startTime < allowedTime) {
+        try {
+          const next = task.next();
+
+          if (typeof next.value !== 'undefined') {
+            value = next.value;
+          }
+
+          if (next.done) return { value, done: next.done };
+
+        } catch (error) {
+          return { value: error, done: true };
+        }
       }
-    }
   }
 
   #executeInWebWorker(task: Task) {
     function getWebWorkerThread() {
       self.addEventListener('message', async (msg) => {
-        const task = new Function(`return (${msg.data})()`);
+        const task = new Function(`return (${(msg as MessageEvent).data})()`);
 
         task()
           .then((result: any) => {
-            postMessage({result}, '');
+            postMessage({result});
           })
           .catch((error: Error) => {
-            postMessage({error}, '');
+            postMessage({error});
           })
       })
     }
@@ -118,8 +138,12 @@ export class Scheduler {
     const taskScriptUrl = URL.createObjectURL(taskScript);
     const worker = new Worker(taskScriptUrl);
 
-    worker.addEventListener('message', (e) => {
-      return e.data;
+    worker.addEventListener('message', ({data}) => {
+      if (data.error) {
+        task.reject(data.error);
+      } else {
+        task.resolve(data.result);
+      }
     })
 
     worker.postMessage(task.callback.toString());
@@ -132,17 +156,19 @@ export class Scheduler {
     });
   }
 
-  addTask(callback: GeneratorFunction, options: TaskOptions): Task {
-    const task = new Task(callback,
-      () => options.inWebWorker
-        ? this.#cancelWebWorkerTask(task)
-        : this.cancelTask(task),
-      options
-    );
+  addTask(callback: GeneratorFunction, options: TaskOptions): Promise<any> {
+    const task = new Task(callback, options);
+
+    const resultPromise = new Promise((resolve, reject) => {
+      task.resolve = resolve;
+      task.reject = reject;
+    });
+
+    this.#tasksResults.set(resultPromise, task);
 
     if (options.inWebWorker) {
       this.#executeInWebWorker(task);
-      return task;
+      return resultPromise;
     }
 
     this.#tasksPipe.head.collection[options.priority].add(task);
@@ -150,20 +176,28 @@ export class Scheduler {
 
     if (!this.#running) this.#start();
 
-    return task;
+    return resultPromise;
   }
 
-  cancelTask(task: Task) {
+  cancelTask(taskPromise: Promise<any>): boolean {
+    const task = this.#tasksResults.get(taskPromise);
+
     if (task.inWebWorker) {
-      this.#cancelWebWorkerTask(task);
-      return;
+      return this.#cancelWebWorkerTask(task);
     }
 
-    this.#removeTask(task);
+    return this.#removeTask(task);
   }
 
-  #cancelWebWorkerTask(task: Task) {
+  #cancelWebWorkerTask(task: Task): boolean {
     this.#webWorkerTasks.get(task).terminate();
-    this.#webWorkerTasks.delete(task);
+    return this.#webWorkerTasks.delete(task);
+  }
+
+  toggleTask(taskPromise: Promise<any>): boolean {
+    const task = this.#tasksResults.get(taskPromise);
+
+    task.paused = !task.paused;
+    return task.paused;
   }
 }
