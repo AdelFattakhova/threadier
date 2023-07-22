@@ -18,20 +18,21 @@
 .container {
   display: grid;
   align-items: end;
-  grid-template-columns: repeat(4, 1fr);
-  width: 1000px;
+  grid-template-columns: repeat(5, 1fr);
+  width: 1010px;
   gap: 30px 50px;
-  margin: auto;
+  margin: 0 auto 90px;
 }
 
 .task {
   position: relative;
+  font-size: 12px;
   font-family: Arial, Helvetica, sans-serif;
 }
 
 .progress {
   width: 0;
-  height: 30px;
+  height: 20px;
   margin-bottom: 5px;
 }
 
@@ -41,14 +42,14 @@
   top: 0;
   left: 0;
   display: block;
-  width: 210px;
-  height: 30px;
+  width: 160px;
+  height: 20px;
   border: 1px dashed;
   border-color: inherit;
 }
 
 .label {
   position: absolute;
-  top: 5px;
+  top: 4px;
   right: 5px;
 }
