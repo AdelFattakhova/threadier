@@ -68,8 +68,8 @@ const tasks = [];
 
 for (let i = 0; i < 60; i++) {
   let label = '';
-  if (i % 8 === 0) label = 'cancelled in 5s';
-  if (i === 26) label = 'paused every 3s';
+  if (i % 8 === 0) label = 'cancelled after 5s';
+  if (i === 26) label = 'paused for 5s after 5s';
   tasks.push(createTask(label));
 }
 
@@ -89,9 +89,9 @@ setTimeout(() => {
   }
 }, 5000);
 
-setInterval(() => {
-  scheduler.toggleTask(tasks[26]);
-}, 3000);
+setTimeout(() => {
+  scheduler.pauseTask(tasks[26], 5000);
+}, 5000);
 
 const wwTask = scheduler.addTask(() => {
   try {

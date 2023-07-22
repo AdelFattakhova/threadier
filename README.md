@@ -26,9 +26,9 @@ const scheduler = new Scheduler({
   sleep: 20,
 });
 ```
-`block: number` – (default is 10) time during which scheduler blocks the main thread, in milliseconds
+`block: number` – (default is 10) ms, time during which scheduler blocks the main thread
 
-`sleep: number` – (default is 10) time during which scheduler pauses its cycle, in milliseconds
+`sleep: number` – (default is 10) ms, time during which scheduler pauses its cycle
 
 Scheduler instance offers methods to add tasks and cancel the existing ones:
 
@@ -61,12 +61,22 @@ scheduler.cancelTask(task);
 ```
 
 ### `toggleTask(taskPromise): boolean`
-Pauses the task's execution, as well as starts it again if the task has already been paused in the moment of method call.
+Pauses the task's execution, or resumes it if the task has already been paused in the moment of method call.
 
 `taskPromise` – Promise returned by `.addTask()`
 
 ```js
 scheduler.toggleTask(task);
+```
+
+### `pauseTask(taskPromise: Promise<any>, timeout: number)`
+Pauses the task's execution for a given amount of milliseconds.
+
+`taskPromise` – Promise returned by `.addTask()`
+`timeout` – ms, time to pause the task for
+
+```js
+scheduler.pauseTask(task, 5000);
 ```
 
 ## Tasks
