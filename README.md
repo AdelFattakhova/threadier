@@ -11,7 +11,7 @@ One cycle of scheduler is going on for the particular amount of time. This time 
 
 During each cycle, the scheduler takes the first task in a sorted tasks list, allots the time to it based on its priority level. The higher the task level, the bigger portion of scheduler running time is devoted to execution of this task. The executed task if not done is moved to the tail of the tasks pipeline for next runs. The tail is also sorted. After that scheduler searches for the next task in the list execution of which can be done during the time left.
 
-[Demo can be found here](./demo)
+[Demo can be found here](https://adelfattakhova.github.io/thready/demo/)
 
 ## How to use
 Create a scheduler instance:
