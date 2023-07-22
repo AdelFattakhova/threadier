@@ -72,6 +72,27 @@ export class Scheduler {
     }
   }
 
+  #runTask(task: Generator, allowedTime: number)
+    : { value: any, done: boolean } {
+      let startTime = Date.now();
+      let value: any;
+
+      while (Date.now() - startTime < allowedTime) {
+        try {
+          const next = task.next();
+
+          if (typeof next.value !== 'undefined') {
+            value = next.value;
+          }
+
+          if (next.done) return { value, done: next.done };
+
+        } catch (error) {
+          return { value: error, done: true };
+        }
+      }
+  }
+
   #removeTask(task: Task): boolean {
     let wasRemoved = false;
 
@@ -94,60 +115,6 @@ export class Scheduler {
 
   #swapPipe() {
     [this.#tasksPipe.tail, this.#tasksPipe.head] = [this.#tasksPipe.head, this.#tasksPipe.tail];
-  }
-
-  #runTask(task: Generator, allowedTime: number)
-    : { value: any, done: boolean } {
-      let startTime = Date.now();
-      let value: any;
-
-      while (Date.now() - startTime < allowedTime) {
-        try {
-          const next = task.next();
-
-          if (typeof next.value !== 'undefined') {
-            value = next.value;
-          }
-
-          if (next.done) return { value, done: next.done };
-
-        } catch (error) {
-          return { value: error, done: true };
-        }
-      }
-  }
-
-  #executeInWebWorker(task: Task) {
-    function getWebWorkerThread() {
-      self.addEventListener('message', async (msg) => {
-        const task = new Function(`return (${(msg as MessageEvent).data})()`);
-
-        task()
-          .then((result: any) => {
-            postMessage({result});
-          })
-          .catch((error: Error) => {
-            postMessage({error});
-          })
-      })
-    }
-
-    const taskScript = new Blob(
-      [`(${getWebWorkerThread.toString()})()`],
-      { type: 'application/javascript' });
-    const taskScriptUrl = URL.createObjectURL(taskScript);
-    const worker = new Worker(taskScriptUrl);
-
-    worker.addEventListener('message', ({data}) => {
-      if (data.error) {
-        task.reject(data.error);
-      } else {
-        task.resolve(data.result);
-      }
-    })
-
-    worker.postMessage(task.callback.toString());
-    this.#webWorkerTasks.set(task, worker);
   }
 
   async #sleep() {
@@ -189,15 +156,47 @@ export class Scheduler {
     return this.#removeTask(task);
   }
 
-  #cancelWebWorkerTask(task: Task): boolean {
-    this.#webWorkerTasks.get(task).terminate();
-    return this.#webWorkerTasks.delete(task);
-  }
-
   toggleTask(taskPromise: Promise<any>): boolean {
     const task = this.#tasksResults.get(taskPromise);
 
     task.paused = !task.paused;
     return task.paused;
+  }
+
+  #executeInWebWorker(task: Task) {
+    function getWebWorkerThread() {
+      self.addEventListener('message', async (msg) => {
+        const task = new Function(`return (${(msg as MessageEvent).data})()`);
+
+        task()
+          .then((result: any) => {
+            postMessage({result});
+          })
+          .catch((error: Error) => {
+            postMessage({error});
+          })
+      })
+    }
+
+    const taskScript = new Blob(
+      [`(${getWebWorkerThread.toString()})()`],
+      { type: 'application/javascript' });
+    const worker = new Worker(URL.createObjectURL(taskScript));
+
+    worker.addEventListener('message', ({data}) => {
+      if (data.error) {
+        task.reject(data.error);
+      } else {
+        task.resolve(data.result);
+      }
+    })
+
+    worker.postMessage(task.callback.toString());
+    this.#webWorkerTasks.set(task, worker);
+  }
+
+  #cancelWebWorkerTask(task: Task): boolean {
+    this.#webWorkerTasks.get(task).terminate();
+    return this.#webWorkerTasks.delete(task);
   }
 }
