@@ -166,10 +166,10 @@ export class Scheduler {
   pauseTask(taskPromise: Promise<any>, timeout: number) {
     const task = this.#tasksResults.get(taskPromise);
 
-    task.paused = !task.paused;
+    task.paused = true;
 
     setTimeout(() => {
-      task.paused = !task.paused;
+      task.paused = false;
     }, timeout);
   }
 
