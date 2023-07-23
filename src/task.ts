@@ -11,12 +11,12 @@ export default class Task {
   resolve: Function;
   reject: Function;
 
-  constructor(callback: GeneratorFunction, options: TaskOptions) {
+  constructor(callback: GeneratorFunction, options?: TaskOptions) {
     this.callback = callback;
-    this.iterator = options.inWebWorker ? null : callback();
-    this.priority = options.priority || this.priority;
+    this.iterator = options?.inWebWorker ? null : callback();
+    this.priority = options?.priority || this.priority;
     this.priorityFactor = PRIORITIES_FACTORS[this.priority];
-    this.inWebWorker = options.inWebWorker || this.inWebWorker;
-    this.paused = options.paused || this.paused;
+    this.inWebWorker = options?.inWebWorker || this.inWebWorker;
+    this.paused = options?.paused || this.paused;
   }
 };

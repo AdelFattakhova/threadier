@@ -14,7 +14,7 @@ export class Scheduler {
   #webWorkerTasks: Map<Task, Worker> = new Map();
   #tasksResults: Map<Promise<any>, Task> = new Map();
 
-  constructor(options: SchedulerOptions) {
+  constructor(options?: SchedulerOptions) {
     this.block = options?.block || this.block;
     this.sleep = options?.sleep || this.sleep;
   }
@@ -123,7 +123,7 @@ export class Scheduler {
     });
   }
 
-  addTask(callback: GeneratorFunction, options: TaskOptions): Promise<any> {
+  addTask(callback: GeneratorFunction, options?: TaskOptions): Promise<any> {
     const task = new Task(callback, options);
 
     const resultPromise = new Promise((resolve, reject) => {
@@ -133,12 +133,12 @@ export class Scheduler {
 
     this.#tasksResults.set(resultPromise, task);
 
-    if (options.inWebWorker) {
+    if (options?.inWebWorker) {
       this.#executeInWebWorker(task);
       return resultPromise;
     }
 
-    this.#tasksPipe.head.collection[options.priority].add(task);
+    this.#tasksPipe.head.collection[task.priority].add(task);
     this.#tasksPipe.head.size++;
 
     if (!this.#running) this.#start();
