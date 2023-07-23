@@ -5,6 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Node.js
-        uses: actions/setup-node@v1
-      - name: run tests
+        uses: actions/setup-node@v3
+      - name: Install dependencies
+        run: npm i
+      - name: Run tests
         run: NODE_OPTIONS=--experimental-vm-modules npx jest
