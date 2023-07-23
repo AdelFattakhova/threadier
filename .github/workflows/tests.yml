@@ -1,0 +1,10 @@
+name: 'jest tests'
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+      - name: run tests
+        run: NODE_OPTIONS=--experimental-vm-modules npx jest
