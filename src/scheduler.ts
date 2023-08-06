@@ -1,6 +1,6 @@
 import { SchedulerOptions, TaskOptions } from './types.js';
 import Task from './task.js';
-import TasksCollection from './tasksCollection.js';
+import TasksCollection from './tasks-collection.js';
 
 export class Scheduler {
   block = 10;
