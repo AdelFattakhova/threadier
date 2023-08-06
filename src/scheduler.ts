@@ -19,6 +19,56 @@ export class Scheduler {
     this.sleep = options?.sleep || this.sleep;
   }
 
+  addTask(callback: GeneratorFunction, options?: TaskOptions): Promise<any> {
+    const task = new Task(callback, options);
+
+    const resultPromise = new Promise((resolve, reject) => {
+      task.resolve = resolve;
+      task.reject = reject;
+    });
+
+    this.#tasksResults.set(resultPromise, task);
+
+    if (options?.inWebWorker) {
+      this.#executeInWebWorker(task);
+      return resultPromise;
+    }
+
+    this.#tasksPipe.head.collection[task.priority].add(task);
+    this.#tasksPipe.head.size++;
+
+    if (!this.#running) this.#start();
+
+    return resultPromise;
+  }
+
+  cancelTask(taskPromise: Promise<any>): boolean {
+    const task = this.#tasksResults.get(taskPromise);
+
+    if (task.inWebWorker) {
+      return this.#cancelWebWorkerTask(task);
+    }
+
+    return this.#removeTask(task);
+  }
+
+  toggleTask(taskPromise: Promise<any>): boolean {
+    const task = this.#tasksResults.get(taskPromise);
+
+    task.paused = !task.paused;
+    return task.paused;
+  }
+
+  pauseTask(taskPromise: Promise<any>, timeout: number) {
+    const task = this.#tasksResults.get(taskPromise);
+
+    task.paused = true;
+
+    setTimeout(() => {
+      task.paused = false;
+    }, timeout);
+  }
+
   async #start() {
     this.#running = true;
     let startTime = Date.now();
@@ -121,56 +171,6 @@ export class Scheduler {
     await new Promise((res) => {
       setTimeout(res, this.sleep);
     });
-  }
-
-  addTask(callback: GeneratorFunction, options?: TaskOptions): Promise<any> {
-    const task = new Task(callback, options);
-
-    const resultPromise = new Promise((resolve, reject) => {
-      task.resolve = resolve;
-      task.reject = reject;
-    });
-
-    this.#tasksResults.set(resultPromise, task);
-
-    if (options?.inWebWorker) {
-      this.#executeInWebWorker(task);
-      return resultPromise;
-    }
-
-    this.#tasksPipe.head.collection[task.priority].add(task);
-    this.#tasksPipe.head.size++;
-
-    if (!this.#running) this.#start();
-
-    return resultPromise;
-  }
-
-  cancelTask(taskPromise: Promise<any>): boolean {
-    const task = this.#tasksResults.get(taskPromise);
-
-    if (task.inWebWorker) {
-      return this.#cancelWebWorkerTask(task);
-    }
-
-    return this.#removeTask(task);
-  }
-
-  toggleTask(taskPromise: Promise<any>): boolean {
-    const task = this.#tasksResults.get(taskPromise);
-
-    task.paused = !task.paused;
-    return task.paused;
-  }
-
-  pauseTask(taskPromise: Promise<any>, timeout: number) {
-    const task = this.#tasksResults.get(taskPromise);
-
-    task.paused = true;
-
-    setTimeout(() => {
-      task.paused = false;
-    }, timeout);
   }
 
   #executeInWebWorker(task: Task) {
