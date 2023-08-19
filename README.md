@@ -1,6 +1,21 @@
 # THREADY
 (don't confuse with social network, pun not intended)
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+  - [What is Thready?](#what-is-thready)
+  - [How it works](#how-it-works)
+  - [How to use](#how-to-use)
+    - [`addTask(callback, options = {}): Promise<any>`](#addtaskcallback-options---promiseany)
+    - [`cancelTask(taskPromise): boolean`](#canceltasktaskpromise-boolean)
+    - [`toggleTask(taskPromise): boolean`](#toggletasktaskpromise-boolean)
+    - [`pauseTask(taskPromise: Promise<any>, timeout: number)`](#pausetasktaskpromise-promiseany-timeout-number)
+  - [Tasks](#tasks)
+    - [Getting tasks results](#getting-tasks-results)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## What is Thready?
 With Thready you can run your heavy tasks with assigned priority and plan their execution. The tasks will be run with the use of preemptive multitasking concept. It means that the scheduler is used in order to manage the tasks execution based on their priority levels and the time given for scheduler to do its work. Your web page will stay interactive while the tasks are running.
 
