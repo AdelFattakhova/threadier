@@ -1,7 +1,7 @@
 {
-  "name": "thready",
+  "name": "threadier",
   "version": "1.0.0",
-  "description": "With Thready you can run your tasks with assigned priority and plan their execution",
+  "description": "With Threadier you can run your tasks with assigned priority and plan their execution",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AdelFattakhova/thready.git"
+    "url": "git+https://github.com/AdelFattakhova/threadier.git"
   },
   "author": "Adel Fattakhova",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/AdelFattakhova/thready/issues"
+    "url": "https://github.com/AdelFattakhova/threadier/issues"
   },
-  "homepage": "https://github.com/AdelFattakhova/thready#readme",
+  "homepage": "https://github.com/AdelFattakhova/threadier#readme",
   "devDependencies": {
     "jest": "29.6.1",
     "typescript": "5.1.6"

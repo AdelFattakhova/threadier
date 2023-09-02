@@ -1,10 +1,9 @@
-# THREADY
-(don't confuse with social network, pun not intended)
+# THREADIER
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-  - [What is Thready?](#what-is-thready)
+  - [What is Threadier?](#what-is-threadier)
   - [How it works](#how-it-works)
   - [How to use](#how-to-use)
     - [`addTask(callback, options = {}): Promise<any>`](#addtaskcallback-options---promiseany)
@@ -16,8 +15,8 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## What is Thready?
-With Thready you can run your heavy tasks with assigned priority and plan their execution. The tasks will be run with the use of preemptive multitasking concept. It means that the scheduler is used in order to manage the tasks execution based on their priority levels and the time given for scheduler to do its work. Your web page will stay interactive while the tasks are running.
+## What is Threadier?
+With Threadier you can run your heavy tasks with assigned priority and plan their execution. The tasks will be run with the use of preemptive multitasking concept. It means that the scheduler is used in order to manage the tasks execution based on their priority levels and the time given for scheduler to do its work. Your web page will stay interactive while the tasks are running.
 
 ## How it works
 Scheduler takes in the tasks to run. It runs while there are pending tasks. When all tasks are finished, scheduler stops. It is started again when the new task is added.
@@ -26,7 +25,7 @@ One cycle of scheduler is going on for the particular amount of time. This time 
 
 During each cycle, the scheduler takes the first task in a sorted tasks list and allots the time to it based on its priority level. The higher the task level, the bigger portion of scheduler running time is devoted to execution of this task. If the task is not done after execution, it is moved to the tail of the tasks pipeline for next runs. The tail is also sorted. After that scheduler searches for the next task in the list which can be run during the time left.
 
-[Demo can be found here](https://adelfattakhova.github.io/thready/demo/)
+[Demo can be found here](https://adelfattakhova.github.io/threadier/demo/)
 
 ## How to use
 Create a scheduler instance:
