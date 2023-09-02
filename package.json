@@ -1,6 +1,6 @@
 {
   "name": "threadier",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "With Threadier you can run your tasks with assigned priority and plan their execution",
   "main": "index.js",
   "type": "module",
