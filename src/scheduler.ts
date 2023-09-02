@@ -37,7 +37,7 @@ export class Scheduler {
     this.#tasksPipe.head.collection[task.priority].add(task);
     this.#tasksPipe.head.size++;
 
-    if (!this.#running) queueMicrotask(this.#start);
+    if (!this.#running) this.#start();
 
     return resultPromise;
   }
